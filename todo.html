@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>To-Do List with Alarms</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #2980b9, #6ab1d7);
+            color: #ffffff;
+            font-family: 'Times New Roman', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        #todoList {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .todoItem {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .todoCheckbox {
+            margin-right: 10px;
+        }
+
+        .todoText {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 18px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            background-color: transparent;
+            color: #ffffff;
+        }
+
+        .todoText::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .alarmTime {
+            width: 100px;
+            margin-right: 10px;
+            border: none;
+            outline: none;
+            font-size: 18px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        .setButton {
+            font-size: 14px;
+            background-color: #27ae60;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .setButton[disabled] {
+            background-color: #c2c2c2;
+        }
+
+        .deleteButton {
+            background-color: #ff4d4d;
+            color: #ffffff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .deleteButton:hover {
+            background-color: #ff1a1a;
+        }
+
+        button {
+            font-size: 18px;
+            background-color: #3498db;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .customWriting {
+            margin-top: 40px;
+            color: #ffffff;
+            text-align: left;
+        }
+
+        .customWriting h2 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .customWriting p {
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .customWriting ul {
+            list-style: disc;
+            padding-left: 20px;
+        }
+
+        .customWriting li {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>To-Do List with Alarms</h1>
+    <div id="todoList">
+        <!-- Todo items will be dynamically added here -->
+    </div>
+    <button id="addTodoButton">Add Task</button>
+
+    <div class="customWriting">
+        <!-- Custom writing content (from the previous examples) -->
+    </div>
+
+    <script>
+        // Function to show notification and start the countdown
+        function showNotification(title, body) {
+            if ('Notification' in window) {
+                Notification.requestPermission(function(permission) {
+                    if (permission === 'granted') {
+                        const notification = new Notification(title, {
+                            body: body,
+                            icon: 'path/to/notification-icon.png' // Replace this with the path to your notification icon
+                        });
+                    }
+                });
+            }
+        }
+
+        // Function to start the countdown and set the alarm
+        function startCountdown(alarmTime, task) {
+            const [hours, minutes] = alarmTime.split(':');
+            const currentTime = new Date();
+            const alarmTimeDate = new Date(
+                currentTime.getFullYear(),
+                currentTime.getMonth(),
+                currentTime.getDate(),
+                parseInt(hours),
+                parseInt(minutes)
+            );
+
+            if (alarmTimeDate > currentTime) {
+                const timeToAlarm = alarmTimeDate - currentTime;
+                setTimeout(function() {
+                    showNotification('Task Reminder', `It's time to do: ${task}`);
+                }, timeToAlarm);
+            }
+        }
+
+        // Event listener to add a new task on button click
+        const addTodoButton = document.getElementById('addTodoButton');
+        addTodoButton.onclick = function() {
+            const todoList = document.getElementById('todoList');
+
+            // Create a new todo item
+            const newTodoItem = document.createElement('div');
+            newTodoItem.classList.add('todoItem');
+
+            // Create input fields for the task and alarm time
+            const todoCheckbox = document.createElement('input');
+            todoCheckbox.type = 'checkbox';
+            todoCheckbox.classList.add('todoCheckbox');
+
+            const todoText = document.createElement('input');
+            todoText.type = 'text';
+            todoText.classList.add('todoText');
+            todoText.placeholder = 'Write your task here...';
+
+            const alarmTimeInput = document.createElement('input');
+            alarmTimeInput.type = 'time';
+            alarmTimeInput.classList.add('alarmTime');
+
+            // Create the set button for the todo item
+            const setButton = document.createElement('button');
+            setButton.innerText = 'Set';
+            setButton.classList.add('setButton');
+            setButton.onclick = function() {
+                startCountdown(alarmTimeInput.value, todoText.value);
+                setButton.disabled = true;
+                setButton.innerText = 'Alarm Set';
+            };
+
+            // Create the delete button for the todo item
+            const deleteButton = document.createElement('button');
+            deleteButton.innerText = 'Delete';
+            deleteButton.classList.add('deleteButton');
+            deleteButton.onclick = function() {
+                todoList.removeChild(newTodoItem);
+            };
+
+            // Append input fields and buttons to the new todo item
+            newTodoItem.appendChild(todoCheckbox);
+            newTodoItem.appendChild(todoText);
+            newTodoItem.appendChild(alarmTimeInput);
+            newTodoItem.appendChild(setButton);
+            newTodoItem.appendChild(deleteButton);
+
+            // Append the new todo item to the todo list;
+            todoList.appendChild(newTodoItem);
+        };
+        // Request permission for notifications
+        if ('Notification' in window) {
+            Notification.requestPermission();
+        }
+    </script>
+</body>
+</html>
